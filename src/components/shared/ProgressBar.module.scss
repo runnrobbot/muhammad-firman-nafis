@@ -1,0 +1,19 @@
+.track {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 400;  /* above header (300) */
+  background: transparent;
+  pointer-events: none;
+}
+
+.bar {
+  height: 100%;
+  background: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  /* No transition — driven frame-by-frame by rAF */
+  box-shadow: 0 0 8px var(--color-accent);
+}

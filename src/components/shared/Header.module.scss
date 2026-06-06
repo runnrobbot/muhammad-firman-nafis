@@ -1,0 +1,292 @@
+@use '../../styles/breakpoints' as *;
+
+/*
+ * Z-index stack:
+ *   400 = reading progress bar (ProgressBar.tsx)
+ *   310 = mobile overlay (portaled to <body>)
+ *   300 = header bar
+ */
+
+/* ─── Header bar ─── */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 300;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(1rem, 4vw, 5rem);
+  /* Solid background — NO semi-transparent while menu is open */
+  background: color-mix(in srgb, var(--color-bg) 96%, transparent);
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent);
+  /*
+   * CRITICAL: No transform here — transform creates a new stacking context,
+   * which would confine any position:fixed children to that context instead
+   * of the viewport.
+   */
+}
+
+/* ─── Logo ─── */
+.logo {
+  display: flex;
+  align-items: baseline;
+  font-family: var(--font-display);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  white-space: nowrap;
+  /* Ensure logo is above overlay on mobile */
+  position: relative;
+  z-index: 311;
+
+  &:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+    border-radius: 2px;
+  }
+}
+
+.logoFirst { color: var(--color-text-primary); }
+
+.logoDot {
+  color: var(--color-accent);
+  font-size: 1.4em;
+  line-height: 0.5;
+  margin-left: 1px;
+}
+
+/* ─── Right cluster ─── */
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  /* Also above overlay */
+  position: relative;
+  z-index: 311;
+}
+
+/* ─── Desktop nav (inside header, hidden on mobile) ─── */
+.desktopNav {
+  display: none;
+
+  @include respond-to(tablet) {
+    display: flex;
+    align-items: center;
+  }
+}
+
+.navList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xl);
+}
+
+.navBtn {
+  font-family: var(--font-body);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  position: relative;
+  transition: color 200ms ease;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    right: 50%;
+    height: 1px;
+    background: var(--color-accent);
+    transition: left 200ms ease, right 200ms ease;
+  }
+
+  &:hover {
+    color: var(--color-text-primary);
+    &::after { left: 0; right: 0; }
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+    border-radius: 2px;
+  }
+}
+
+.navBtnActive {
+  color: var(--color-accent) !important;
+  &::after { left: 0 !important; right: 0 !important; }
+}
+
+/* ─── Dark mode toggle ─── */
+.themeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+  transition: color 150ms ease, border-color 150ms ease, background 150ms ease;
+
+  &:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+    background: var(--color-accent-muted);
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+    border-radius: 8px;
+  }
+
+  svg { width: 16px; height: 16px; }
+}
+
+/* ─── Hamburger — mobile only ─── */
+.menuBtn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+
+  @include respond-to(tablet) {
+    display: none;
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+    border-radius: 4px;
+  }
+}
+
+/* ─── Hamburger bars ─── */
+.bar {
+  width: 22px;
+  height: 2px;
+  background: var(--color-text-primary);
+  border-radius: 2px;
+  display: block;
+  transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1),
+              opacity  180ms ease;
+  transform-origin: center;
+
+  &[data-bar='1'][data-open] { transform: translateY(7px) rotate(45deg); }
+  &[data-bar='2'][data-open] { opacity: 0; transform: scaleX(0); }
+  &[data-bar='3'][data-open] { transform: translateY(-7px) rotate(-45deg); }
+}
+
+/* ══════════════════════════════════════════════════════
+   MOBILE OVERLAY — rendered via portal to <body>
+   
+   Because this is portaled OUTSIDE the <header> element,
+   it is NOT constrained by the header's stacking context.
+   position:fixed here is truly viewport-relative.
+   ══════════════════════════════════════════════════════ */
+
+.mobileOverlay {
+  /* Show on mobile only — hidden on tablet+ */
+  @include respond-to(tablet) {
+    display: none !important;
+  }
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 310;      /* above header (300) */
+
+  /* Solid opaque background — no bleed-through */
+  background-color: var(--color-bg);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  /* Hidden state — instant visibility change prevents tab-into-hidden */
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 260ms ease,
+              visibility 0ms linear 260ms;
+}
+
+/* Open state — visibility becomes visible immediately on open */
+.mobileOverlayOpen {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 260ms ease,
+              visibility 0ms linear 0ms;
+}
+
+/* Nav links inside overlay */
+.mobileNavList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(1.75rem, 5vh, 3rem);
+}
+
+.mobileNavBtn {
+  font-family: var(--font-body);
+  font-size: clamp(1.75rem, 6vw, 2.5rem);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-xs) var(--space-xl);
+  letter-spacing: 0.01em;
+  transition: color 180ms ease;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--color-text-primary);
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+    border-radius: 4px;
+  }
+}
+
+.mobileNavBtnActive {
+  color: var(--color-accent) !important;
+}

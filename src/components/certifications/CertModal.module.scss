@@ -1,0 +1,286 @@
+@use '../../styles/breakpoints' as *;
+
+/* ─── Backdrop ─── */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  /*
+   * 250 = above all page content but below header (300).
+   * Modal is still accessible and header stays on top.
+   */
+  z-index: 250;
+  background: rgba(0, 0, 0, 0.76);
+  display: flex;
+  align-items: flex-end;   /* mobile: sheet slides from bottom */
+  justify-content: center;
+  /* No padding on mobile — full-width sheet */
+  padding: 0;
+  opacity: 0;              /* anime.js animates this to 1 */
+
+  @include respond-to(tablet) {
+    align-items: center;   /* desktop: centered dialog */
+    padding: var(--space-lg);
+  }
+}
+
+/* ─── Modal shell ─── */
+.modal {
+  position: relative;
+  width: 100%;
+  background: var(--color-surface);
+  display: flex;
+  flex-direction: column;
+  opacity: 0;              /* anime.js animates this to 1 */
+
+  /* Mobile: bottom sheet — occupies most of the screen height */
+  height: 92svh;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+
+  @include respond-to(tablet) {
+    /* Desktop: centered dialog with fixed max dimensions */
+    height: 88svh;
+    max-width: 900px;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+  }
+}
+
+/* ─── Drag handle (mobile only) ─── */
+.modal::before {
+  content: '';
+  display: block;
+  width: 36px;
+  height: 4px;
+  background: var(--color-border);
+  border-radius: 2px;
+  margin: var(--space-sm) auto 0;
+  flex-shrink: 0;
+
+  @include respond-to(tablet) {
+    display: none;
+  }
+}
+
+/* ─── Header bar ─── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+  gap: var(--space-sm);
+  min-width: 0;
+
+  @include respond-to(tablet) {
+    padding: var(--space-md) var(--space-lg);
+    gap: var(--space-md);
+  }
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+
+  @include respond-to(tablet) {
+    font-size: var(--font-size-base);
+  }
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex-shrink: 0;
+
+  @include respond-to(tablet) {
+    gap: var(--space-sm);
+  }
+}
+
+.actionBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-family: var(--font-body);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 5px var(--space-sm);
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: border-color 150ms ease, color 150ms ease;
+
+  &:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
+
+  /* Hide text on very small screens, keep icon */
+  span {
+    @media (max-width: 400px) {
+      display: none;
+    }
+  }
+}
+
+.actionBtnPrimary {
+  color: var(--color-accent);
+  border-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
+  background: var(--color-accent-muted);
+
+  &:hover {
+    background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+    border-color: var(--color-accent);
+  }
+}
+
+.closeBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  transition: color 150ms ease, border-color 150ms ease;
+
+  &:hover {
+    color: var(--color-text-primary);
+    border-color: var(--color-text-primary);
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* ─── PDF iframe — fills remaining space ─── */
+.viewer {
+  /* flex: 1 + min-height: 0 is the correct pattern for iframe inside flex column */
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  border: none;
+  background: #525659;   /* match browser PDF viewer dark background */
+  display: block;
+}
+
+/* ─── Mobile / iOS fallback ─── */
+.fallback {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-lg);
+  padding: var(--space-2xl) var(--space-xl);
+  text-align: center;
+}
+
+.fallbackIcon {
+  width: 56px;
+  height: 56px;
+  color: var(--color-accent);
+  opacity: 0.7;
+}
+
+.fallbackTitle {
+  font-family: var(--font-display);
+  font-size: var(--font-size-lg);
+  color: var(--color-text-primary);
+  line-height: 1.3;
+  max-width: 30ch;
+}
+
+.fallbackNote {
+  font-family: var(--font-body);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  max-width: 32ch;
+}
+
+.fallbackBtns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  justify-content: center;
+}
+
+.fallbackBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-family: var(--font-body);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: var(--space-sm) var(--space-xl);
+  text-decoration: none;
+  transition: border-color 150ms ease, color 150ms ease;
+
+  &:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.fallbackBtnPrimary {
+  color: #fff;
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+
+  &:hover {
+    color: #fff;
+    background: var(--color-accent-dark, color-mix(in srgb, var(--color-accent) 85%, #000));
+    border-color: var(--color-accent-dark, color-mix(in srgb, var(--color-accent) 85%, #000));
+  }
+}
