@@ -123,8 +123,7 @@ function App(): JSX.Element {
         }}
       >
         <p>
-          © {new Date().getFullYear()} Muhammad Firman Nafis Aufa Suyanto. Built with React &amp;
-          Vite.
+          © {new Date().getFullYear()} Muhammad Firman Nafis Aufa Suyanto.
         </p>
       </footer>
     </>

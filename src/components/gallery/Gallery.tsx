@@ -21,7 +21,7 @@ function getAsset(filename: string): string | null {
   return assetModules[key] ?? null;
 }
 
-const profileSrc = getAsset('syafirman.png');
+const profileSrc = getAsset('firman.png');
 
 const GALLERY_FILENAMES = [
   'gallery1.png', 'gallery2.png', 'gallery3.png',
