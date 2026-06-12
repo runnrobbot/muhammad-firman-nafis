@@ -6,7 +6,7 @@ import { useReducedMotion } from '../../animations/hooks/useReducedMotion';
 import styles from './CV.module.scss';
 import anime from 'animejs';
 
-const CV_URL = '/certificates/cv.pdf';
+const CV_URL = '/certificates/Muhammad_Firman_Nafis_CV.pdf';
 
 // ─── Inline PDF viewer modal ──────────────────────────────────────
 function CVModal({ onClose }: { onClose: () => void }): JSX.Element {

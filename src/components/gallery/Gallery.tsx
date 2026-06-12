@@ -6,7 +6,7 @@ import { useReducedMotion } from '../../animations/hooks/useReducedMotion';
 import styles from './Gallery.module.scss';
 import anime from 'animejs';
 
-const CV_URL = '/certificates/cv.pdf';
+const CV_URL = '/certificates/Muhammad_Firman_Nafis_CV.pdf';
 
 // ─── Eagerly load all assets via Vite glob import ─────────────────
 // Returns a map of { './filename.png': { default: 'url...' } }
